@@ -1,0 +1,83 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const inputElement = document.getElementById("input");
+    const historyToggle = document.querySelector(".history-toggle");
+    const historyOverlay = document.querySelector(".history-overlay");
+    const historyPanel = document.querySelector(".history-panel");
+    const historyClearButton = document.querySelector(".history-clear");
+    const historyList = document.querySelector(".history-list");
+
+    let history = [];
+
+    // Function to update the calculator input
+    function updateInput(value) {
+        inputElement.textContent = value;
+    }
+
+    // Function to handle digit and operator clicks
+    function handleKeyClick(value) {
+        if (inputElement.textContent === "0" || inputElement.textContent === "Error") {
+            updateInput(value);
+        } else {
+            updateInput(inputElement.textContent + value);
+        }
+    }
+
+    // Event listener for calculator keys
+    document.querySelectorAll(".keys button").forEach((button) => {
+        button.addEventListener("click", () => {
+            handleKeyClick(button.textContent);
+        });
+    });
+
+    // Event listener for CE button
+    document.querySelector("#ce").addEventListener("click", () => {
+        const currentInput = inputElement.textContent;
+        if (currentInput !== "0") {
+            updateInput(currentInput.slice(0, -1));
+        }
+    });
+
+    // Event listener for C button
+    document.querySelector("#c").addEventListener("click", () => {
+        updateInput("0");
+    });
+
+    // Event listener for backspace button
+    document.querySelector("#backspace").addEventListener("click", () => {
+        const currentInput = inputElement.textContent;
+        if (currentInput !== "0") {
+            updateInput(currentInput.slice(0, -1));
+        }
+    });
+
+    // Event listener for equal (=) button
+    document.querySelector("#equal").addEventListener("click", () => {
+        const currentInput = inputElement.textContent;
+        try {
+            const result = eval(currentInput);
+            updateInput(result);
+            history.push(currentInput + " = " + result);
+            localStorage.setItem("calculatorHistory", JSON.stringify(history));
+        } catch (error) {
+            updateInput("Error");
+        }
+    });
+
+    // Event listener for history toggle button
+    historyToggle.addEventListener("click", () => {
+        historyOverlay.style.display = "block";
+    });
+
+    // Event listener for history clear button
+    historyClearButton.addEventListener("click", () => {
+        history = [];
+        localStorage.removeItem("calculatorHistory");
+        historyList.innerHTML = "";
+    });
+
+    // Load history from localStorage
+    if (localStorage.getItem("calculatorHistory")) {
+        history = JSON.parse(localStorage.getItem("calculatorHistory"));
+        historyList.innerHTML = history.map((item) => `<li>${item}</li>`).join("");
+    }
+});
